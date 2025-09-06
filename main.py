@@ -44,7 +44,7 @@ async def chat(interaction: discord.Interaction) -> None:
     )
     voice_client.listen(sink)
     
-    await interaction.response.send_message("Gemini hört zu")
+    await interaction.response.send_message("Nano hört zu")
 
 @bot.tree.command(name="exit")
 async def exit(interaction: discord.Interaction) -> None:
