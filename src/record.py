@@ -44,7 +44,7 @@ class AudioProcessor(voice_recv.AudioSink):
         self.bot: commands.Bot = bot
         self.gemini_ws: GeminiWebSocket = gemini_ws
         self.known_ssrcs = set()
-        self._voice_client = None  # Eigener Name, um Konflikte zu vermeiden
+        self._voice_client = None  # eigener Name, um Konflikte zu vermeiden
 
     def wants_opus(self) -> bool:
         return False
