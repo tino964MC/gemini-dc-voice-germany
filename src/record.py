@@ -6,7 +6,7 @@ from discord.ext import commands, voice_recv
 from src.gemini import GeminiWebSocket
 
 # ---- HIER EINSTELLEN ----
-WAKE_WORD = "nano"    # Dein gewünschtes Wake-Word, z.B. "gemini", "marvin", "bot"
+WAKE_WORD = "nano"    # dein gewünschtes Wake-Word, z.B. "gemini", "marvin", "bot"
 USE_WAKE_WORD = True  # Wenn False, antwortet der Bot IMMER, egal ob Wake-Word gesagt wurde
 # -------------------------
 
