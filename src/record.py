@@ -135,7 +135,7 @@ class AudioProcessor(voice_recv.AudioSink):
                                 print(f"Wake-Word '{WAKE_WORD}' nicht erkannt, keine Antwort!")
                                 # Optional: Discord-Hinweis
                                 # asyncio.run_coroutine_threadsafe(
-                                #     self.channel.send(f"bitte beginne deinen Satz mit '{WAKE_WORD}', damit ich antworte."),
+                                #     self.channel.send(f"Bitte beginne deinen Satz mit '{WAKE_WORD}', damit ich antworte."),
                                 #     self.bot.loop
                                 # )
                         else:
