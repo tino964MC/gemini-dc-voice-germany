@@ -6,8 +6,8 @@ from discord.ext import commands, voice_recv
 from src.gemini import GeminiWebSocket
 
 # ---- HIER EINSTELLEN ----
-WAKE_WORD = "kino"    # Dein gewünschtes Wake-Word, z.B. "gemini", "marvin", "bot"
-USE_WAKE_WORD = True    # Wenn False, antwortet der Bot IMMER, egal ob Wake-Word gesagt wurde
+WAKE_WORD = "nano"    # Dein gewünschtes Wake-Word, z.B. "gemini", "marvin", "bot"
+USE_WAKE_WORD = True  # Wenn False, antwortet der Bot IMMER, egal ob Wake-Word gesagt wurde
 # -------------------------
 
 recognizer = sr.Recognizer()
@@ -22,16 +22,19 @@ def convert_audio_to_text_using_google_speech(audio: sr.AudioData) -> str:
         return "could_not_understand"
     except sr.RequestError as e:
         print(f"Could not request results from speech recognition service; {e}")
-        return "service_error" 
+        # Rate Limit erkennen!
+        if "429" in str(e) or "rate limit" in str(e).lower() or "too many requests" in str(e).lower():
+            return "rate_limit"
+        return "service_error"
     except Exception as e:
         print(f"Error in speech recognition: {e}")
-        return "error" 
+        return "error"
 
 class AudioProcessor(voice_recv.AudioSink):
-    def __init__(self, 
-                 user: discord.User, 
-                 channel: discord.TextChannel, 
-                 bot: commands.Bot, 
+    def __init__(self,
+                 user: discord.User,
+                 channel: discord.TextChannel,
+                 bot: commands.Bot,
                  gemini_ws: GeminiWebSocket) -> None:
         super().__init__()
         self.buffer: bytes = b""
@@ -92,10 +95,11 @@ class AudioProcessor(voice_recv.AudioSink):
 
                     if audio_data.get_wav_data().strip():
                         result = convert_audio_to_text_using_google_speech(audio_data)
-                        if result in ["could_not_understand", "service_error", "error"]:
-                            if result == "could_not_understand":
+                        # Fehlerbehandlung:
+                        if result in ["rate_limit", "service_error", "error"]:
+                            if result == "rate_limit":
                                 future = asyncio.run_coroutine_threadsafe(
-                                    self.channel.send("Ich konnte dich nicht verstehen."),
+                                    self.channel.send("Google Speech API: Rate Limit erreicht. Bitte warte einen Moment, bevor du es erneut versuchst."),
                                     self.bot.loop
                                 )
                             elif result == "service_error":
@@ -111,9 +115,10 @@ class AudioProcessor(voice_recv.AudioSink):
                             try:
                                 future.result(timeout=5)
                             except Exception as e:
-                                print(f"Error sending message: {e}")
+                                print(f"Fehler beim senden der nachricht: {e}")
                             return
-                        
+                        # Kein "Ich konnte dich nicht verstehen." mehr!
+
                         print(f"Text: {result}")
 
                         # ---- WAKE-WORD LOGIK ----
@@ -123,7 +128,7 @@ class AudioProcessor(voice_recv.AudioSink):
                             if result.startswith(WAKE_WORD):
                                 frage = result[len(WAKE_WORD):].strip()
                                 if not frage:
-                                    frage = "Wie kann ich dir helfen?"
+                                    frage = "hallo"
                                 print(f"Wake-Word erkannt! Frage an Gemini: {frage}")
                             else:
                                 antworten = False
@@ -143,6 +148,4 @@ class AudioProcessor(voice_recv.AudioSink):
                     traceback.print_exc()
 
     def cleanup(self) -> None:
-        self.buffer = b""
-        self.recording_active = False
-        self.known_ssrcs = set()
+        pass
